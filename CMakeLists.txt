@@ -21,12 +21,12 @@ my_protobuf_generate_cpp(cld_3/protos PROTO_SRCS PROTO_HDRS src/feature_extracto
 message(STATUS "PROTO_HDRS= ${PROTO_HDRS}")
 
 add_definitions(-fPIC) # Position Independant Code
-add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
-add_definitions(-std=c++11) # Needed for std::to_string(), ...
+#add_definitions(-D_GLIBCXX_USE_CXX11_ABI=0)
+add_definitions(-std=c++17) # Needed for std::to_string(), ...
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR} ${Protobuf_INCLUDE_DIRS}) # needed to include generated pb headers
 
-add_library(${PROJECT_NAME} 
+add_library(${PROJECT_NAME} SHARED
 	${PROTO_SRCS} ${PROTO_HDRS}
 	src/base.cc
 	src/embedding_feature_extractor.cc
@@ -67,3 +67,7 @@ target_link_libraries(getonescriptspan_test cld3 ${Protobuf_LITE_LIBRARIES})
 
 add_executable(language_identifier_features_test src/language_identifier_features_test.cc)
 target_link_libraries(language_identifier_features_test cld3 ${Protobuf_LITE_LIBRARIES})
+
+add_executable(nnet_lang_id_test src/nnet_lang_id_test.cc src/nnet_lang_id_test_data.h src/nnet_lang_id_test_data.cc)
+target_link_libraries(nnet_lang_id_test cld3 ${Protobuf_LITE_LIBRARIES})
+

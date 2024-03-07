@@ -73,7 +73,7 @@ bool ResultIsReliable(const string &language, float probability) {
 }
 
 // Finds the number of interchange-valid bytes to process.
-int FindNumValidBytesToProcess(const string &text) {
+int FindNumValidBytesToProcess(string_view text) {
   // Check if the size of the input text can fit into an int. If not, focus on
   // the first std::numeric_limits<int>::max() bytes.
   const int doc_text_size =
@@ -84,7 +84,7 @@ int FindNumValidBytesToProcess(const string &text) {
   // Truncate the input text if it is too long and find the span containing
   // interchange-valid UTF8.
   const int num_valid_bytes = CLD2::SpanInterchangeValid(
-      text.c_str(),
+      text.data(),
       std::min(NNetLanguageIdentifier::kMaxNumInputBytesToConsider,
                doc_text_size));
 
@@ -186,14 +186,14 @@ string NNetLanguageIdentifier::GetLanguageName(int language_id) const {
 }
 
 NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguage(
-    const string &text) {
+    string_view text) {
   const int num_valid_bytes = FindNumValidBytesToProcess(text);
 
   // Iterate over the input with ScriptScanner to clean up the text (e.g.,
   // removing digits, punctuation, brackets).
   // TODO(abakalov): Extract the code that does the clean-up out of
   // ScriptScanner.
-  CLD2::ScriptScanner ss(text.c_str(), num_valid_bytes, /*is_plain_text=*/true);
+  CLD2::ScriptScanner ss(text.data(), num_valid_bytes, /*is_plain_text=*/true);
   CLD2::LangSpan script_span;
   string cleaned;
   while (ss.GetOneScriptSpanLower(&script_span)) {
@@ -227,11 +227,16 @@ NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguage(
   return FindLanguageOfValidUTF8(squeezed_text_to_process);
 }
 
-NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguageOfValidUTF8(
+NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguage(
     const string &text) {
+  return FindLanguage(static_cast<string_view>(text)); 
+}
+
+NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguageOfValidUTF8(
+    string_view text) {
   // Create a Sentence storing the input text.
   Sentence sentence;
-  sentence.set_text(text);
+  sentence.set_text(static_cast<string>(text));
 
   // Predict language.
   // TODO(salcianu): reuse vector<FeatureVector>.
@@ -265,7 +270,7 @@ NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguageOfValidUTF8(
 }
 
 std::vector<NNetLanguageIdentifier::Result>
-NNetLanguageIdentifier::FindTopNMostFreqLangs(const string &text,
+NNetLanguageIdentifier::FindTopNMostFreqLangs(string_view text,
                                               int num_langs) {
   std::vector<Result> results;
 
@@ -280,7 +285,7 @@ NNetLanguageIdentifier::FindTopNMostFreqLangs(const string &text,
   }
 
   // Process each subsequence of the same script.
-  CLD2::ScriptScanner ss(text.c_str(), num_valid_bytes, /*is_plain_text=*/true);
+  CLD2::ScriptScanner ss(text.data(), num_valid_bytes, /*is_plain_text=*/true);
   CLD2::LangSpan script_span;
   std::unordered_map<string, LangChunksStats> lang_stats;
   int total_num_bytes = 0;
@@ -343,6 +348,12 @@ NNetLanguageIdentifier::FindTopNMostFreqLangs(const string &text,
     results.emplace_back();
   }
   return results;
+}
+
+std::vector<NNetLanguageIdentifier::Result>
+NNetLanguageIdentifier::FindTopNMostFreqLangs(const string &text,
+                                              int num_langs) {
+  return FindTopNMostFreqLangs(static_cast<string_view>(text), num_langs);
 }
 
 string NNetLanguageIdentifier::SelectTextGivenScriptSpan(

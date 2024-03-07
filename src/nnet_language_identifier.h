@@ -17,6 +17,7 @@ limitations under the License.
 #define NNET_LANGUAGE_IDENTIFIER_H_
 
 #include <string>
+#include <string_view>
 
 #include "base.h"
 #include "embedding_feature_extractor.h"
@@ -82,6 +83,8 @@ class NNetLanguageIdentifier {
   // function returns kUnknown.
   Result FindLanguage(const string &text);
 
+  Result FindLanguage(string_view text);
+
   // Splits the input text (up to the first byte, if any, that is not
   // interchange valid UTF8) into spans based on the script, predicts a language
   // for each span, and returns a vector storing the top num_langs most frequent
@@ -93,6 +96,8 @@ class NNetLanguageIdentifier {
   // skipped. If the input text is too long, only the first
   // kMaxNumInputBytesToConsider bytes are processed.
   std::vector<Result> FindTopNMostFreqLangs(const string &text, int num_langs);
+
+  std::vector<Result> FindTopNMostFreqLangs(string_view text, int num_langs);
 
   // String returned when a language is unknown or prediction cannot be made.
   static const char kUnknown[];
@@ -129,7 +134,7 @@ class NNetLanguageIdentifier {
 
   // Finds the most likely language for the given text. Assumes that the text is
   // interchange valid UTF8.
-  Result FindLanguageOfValidUTF8(const string &text);
+  Result FindLanguageOfValidUTF8(string_view text);
 
   // Returns the language name corresponding to the given id.
   string GetLanguageName(int language_id) const;

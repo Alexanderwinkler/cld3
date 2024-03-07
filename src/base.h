@@ -25,6 +25,7 @@ namespace chrome_lang_id {
 
 using std::vector;
 using std::string;
+using std::string_view;
 using std::map;
 using std::pair;
 typedef unsigned int uint32;
