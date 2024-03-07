@@ -236,7 +236,7 @@ NNetLanguageIdentifier::Result NNetLanguageIdentifier::FindLanguageOfValidUTF8(
     string_view text) {
   // Create a Sentence storing the input text.
   Sentence sentence;
-  sentence.set_text(static_cast<string>(text));
+  sentence.set_text(std::move(static_cast<string>(text)));
 
   // Predict language.
   // TODO(salcianu): reuse vector<FeatureVector>.
