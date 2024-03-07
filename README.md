@@ -160,6 +160,20 @@ gn gen out/Default
 ninja -C out/Default third_party/cld_3/src/src:language_identifier_main
 out/Default/language_identifier_main
 ```
+
+### Build the Shared Library (without Chromium)
+
+- make sure that protobuf-compiler is installed, e.g. on Ubuntu/Debian
+  ```shell
+  sudo apt install protobuf-compiler
+  ```
+- build and run the model using the commands:
+  ```shell
+  cmake -G Ninja
+  ninja
+  ```
+- `./libcld3.so` and test binaries are built
+
 ### Bugs and Feature Requests
 
 Open a [GitHub issue](https://github.com/google/cld3/issues) for this repository to file bugs and feature requests.
